@@ -7,12 +7,11 @@ log = core.getLogger()
 class OrangeLogic (object):
     def __init__ (self, connection):
         self.connection = connection
-        # Listen to events (like PacketIn) from this specific switch
+        # Register the listeners so POX calls _handle_PacketIn
         connection.addListeners(self)
-        log.info("Switch %s connected. Orange Logic active.", connection.dpid)
+        log.info("--- Orange Logic Initialized for Switch %s ---", connection.dpid)
 
-        # STATIC MAPPING: Matches the default Mininet MACs for a 3-host topo
-        # Format: MAC Address -> Switch Port
+        # STATIC MAPPING: MAC -> Port
         self.mapping = {
             '00:00:00:00:00:01': 1,
             '00:00:00:00:00:02': 2,
@@ -20,46 +19,38 @@ class OrangeLogic (object):
         }
 
     def _handle_PacketIn (self, event):
-        """
-        This function is called every time the switch receives a packet 
-        it doesn't know how to handle.
-        """
         packet = event.parsed
+        
+        # 1. THE AUDIT LOG: Every packet hitting the controller will print this.
+        # This proves the connection between Mininet and POX is live.
+        log.info("INCOMING: Src %s -> Dst %s (On Port %i)", 
+                 packet.src, packet.dst, event.port)
+
         dst_mac = str(packet.dst)
 
-        # Check if the destination is in our known Orange Table
+        # 2. MATCH-ACTION LOGIC
         if dst_mac in self.mapping:
             out_port = self.mapping[dst_mac]
             
-            # Create a Flow Modification message (The "Action")
+            # Create the Flow Modification (Pushing a rule to the switch)
             msg = of.ofp_flow_mod()
-            
-            # Set the "Match": Match based on the incoming packet's details
-            msg.match = of.ofp_match.from_packet(packet)
-            
-            # Set the "Action": Send the packet out of the mapped port
+            msg.match = of.ofp_match(dl_dst = packet.dst)
             msg.actions.append(of.ofp_action_output(port = out_port))
             
-            # Send the rule to the switch
             self.connection.send(msg)
-            
-            log.info("INSTALLED RULE: Destination %s -> Port %i", dst_mac, out_port)
+            log.info(">>> SUCCESS: Rule Installed for %s on Port %i", dst_mac, out_port)
+        
         else:
-            # If the destination is unknown, flood the packet (Standard SDN Fallback)
+            # 3. FALLBACK: If MAC is unknown (like Broadcast/ARP), we must flood
+            log.debug("Unknown Destination %s - Flooding to all ports", dst_mac)
             msg = of.ofp_packet_out()
             msg.data = event.ofp
             msg.actions.append(of.ofp_action_output(port = of.OFPP_FLOOD))
             self.connection.send(msg)
 
 def launch ():
-    """
-    The entry point that POX calls when you run 'python3 pox.py orange'
-    """
     def start_switch (event):
-        # Create an instance of our logic for every switch that connects
         OrangeLogic(event.connection)
-
-    # Listen for the 'ConnectionUp' event (when the switch connects to POX)
-    core.openflow.addListenerByName("ConnectionUp", start_switch)
     
-    log.info("--- ORANGE CONTROLLER IS READY ---")
+    core.openflow.addListenerByName("ConnectionUp", start_switch)
+    log.info("--- ORANGE CONTROLLER SYSTEM: ONLINE ---")
