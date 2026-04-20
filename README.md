@@ -1,7 +1,3 @@
-If you need a professional explanation of your SDN project for a GitHub README or a project report without including setup instructions or execution steps, you can use the text below. It focuses on the **architectural logic** and the **networking theory** behind your work.
-
----
-
 # Software Defined Networking (SDN) Flow Controller
 
 ## 🌐 Project Overview
