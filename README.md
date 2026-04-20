@@ -42,3 +42,17 @@ The system's stability was verified through **Path Persistence** testing. By res
 * **Granular Control:** SDN allows for direct manipulation of the switch's flow table via OpenFlow.
 * **Efficiency:** Proactive rule installation eliminates the "First Packet Drop" common in reactive networks.
 * **Transparency:** Tools like Wireshark and `ovs-ofctl` allow for real-time inspection of the binary instructions (FlowMods) that govern the network.
+
+
+## OUTPUTS
+<img width="927" height="344" alt="ss1" src="https://github.com/user-attachments/assets/28ed2440-e056-40f7-80f8-447d9e892e3e" />
+<img width="927" height="551" alt="ss2" src="https://github.com/user-attachments/assets/36060995-cb69-4b4d-8e38-73dcdf618bf1" />
+<img width="1317" height="165" alt="ss3" src="https://github.com/user-attachments/assets/7027262a-1dc3-4f8e-aa38-6b701b8ef0c9" />
+<img width="1317" height="600" alt="ss5" src="https://github.com/user-attachments/assets/80c5286a-3989-47af-930f-30dcc4659723" />
+<img width="1854" height="860" alt="ss6" src="https://github.com/user-attachments/assets/9b6e9abd-7c79-4e03-a163-7ce2b5c9222f" />
+
+
+
+
+
+
